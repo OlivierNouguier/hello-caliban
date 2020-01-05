@@ -9,6 +9,7 @@ lazy val `hello-caliban` =
     .settings(settings)
     .settings(
       libraryDependencies ++= Seq(
+        library.caliban,
         library.scalaCheck % Test,
         library.scalaTest  % Test,
       )
@@ -21,9 +22,11 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
+      val caliban = "0.4.1"
       val scalaCheck = "1.14.2"
       val scalaTest  = "3.1.0"
     }
+    val caliban    = "com.github.ghostdogpr" %% "caliban-akka-http" % Version.caliban
     val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
     val scalaTest  = "org.scalatest"  %% "scalatest"  % Version.scalaTest
   }
