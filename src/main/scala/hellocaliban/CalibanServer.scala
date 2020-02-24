@@ -16,24 +16,52 @@
 
 package hellocaliban
 
+import caliban.AkkaHttpAdapter
 import caliban.schema.GenericSchema
+
 import zio.console.Console
 import zio.clock.Clock
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.Http
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+
+import zio.DefaultRuntime
+
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives._
+
+import caliban.schema.GenericSchema
+
+import zio.clock.Clock
+import zio.console.Console
+
+import pug.GraphQLPug
+
+import akka.http.scaladsl.model.StatusCodes
+import scala.io.StdIn
 
 object CalibanServer extends App with GenericSchema[Console with Clock] {
 
-  implicit val system       = ActorSystem()
-  implicit val materializer = ActorMaterializer()
+  implicit val system           = ActorSystem()
+  implicit val executionContext = system.dispatcher
+  implicit val defaultRuntime   = new DefaultRuntime {}
 
-  val route = path("api" / "graphql") {} ~ path("graphiql") {
+  val route = path("api" / "graphql") {
+      AkkaHttpAdapter.makeHttpService(GraphQLPug.interp)
+    } ~ path("graphiql") {
       getFromResource("graphiql.html")
+    } ~ path("") {
+      redirect("graphiql", StatusCodes.TemporaryRedirect)
     }
 
-  Http().bindAndHandle(route, "localhost", 8888)
+  val binding = Http().bindAndHandle(route, "localhost", 8888)
+
+  println("Hit return to stop.")
+
+  val _ = StdIn.readLine()
+
+  binding.flatMap(_.unbind()).onComplete(_ => system.terminate())
 
 }
