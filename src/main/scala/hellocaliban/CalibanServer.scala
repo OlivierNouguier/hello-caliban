@@ -17,51 +17,75 @@
 package hellocaliban
 
 import caliban.AkkaHttpAdapter
-import caliban.schema.GenericSchema
-
-import zio.console.Console
-import zio.clock.Clock
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.Http
 import akka.actor.ActorSystem
 
-import zio.DefaultRuntime
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
-
-import caliban.schema.GenericSchema
-
-import zio.clock.Clock
-import zio.console.Console
 
 import pug.GraphQLPug
 
 import akka.http.scaladsl.model.StatusCodes
-import scala.io.StdIn
 
-object CalibanServer extends App with GenericSchema[Console with Clock] {
+import zio.DefaultRuntime
+import zio.ZIO
+import org.slf4j.LoggerFactory
+import hellocaliban.friends.Persistence
 
-  implicit val system           = ActorSystem()
-  implicit val executionContext = system.dispatcher
-  implicit val defaultRuntime   = new DefaultRuntime {}
+//import hellocaliban.friends.PugTransactor
 
-  val route = path("api" / "graphql") {
-      AkkaHttpAdapter.makeHttpService(GraphQLPug.interp)
-    } ~ path("graphiql") {
-      getFromResource("graphiql.html")
-    } ~ path("") {
-      redirect("graphiql", StatusCodes.TemporaryRedirect)
+object CalibanServer { //extends App with GenericSchema[Console with Clock] {
+
+  val logger = LoggerFactory.getLogger(getClass())
+
+  implicit val rt = new DefaultRuntime {}
+
+  def build(
+      implicit system: ActorSystem
+  ): ZIO[CalibanApp.AppEnvironment, Throwable, Http.ServerBinding] =
+    for {
+      e <- ZIO.environment[CalibanApp.AppEnvironment]
+      d <- makeCalibanServer(e.pugPersistence)
+    } yield d
+
+  def makeCalibanServer(peristence: Persistence.Service[Any])(
+      implicit system: ActorSystem
+  ): ZIO[CalibanApp.AppEnvironment, Throwable, Http.ServerBinding] = {
+    implicit val executionContext = system.dispatcher
+
+    logger.info("Start server")
+
+    val lock = new Object
+
+    val _ = sys.addShutdownHook {
+      logger.info("Hooked")
+      lock.synchronized {
+        lock.notify()
+      }
     }
 
-  val binding = Http().bindAndHandle(route, "localhost", 8888)
+    val route = path("api" / "graphql") {
+        AkkaHttpAdapter.makeHttpService(new GraphQLPug(peristence).interp)
+      } ~ path("graphiql") {
+        getFromResource("graphiql.html")
+      } ~ path("") {
+        redirect("graphiql", StatusCodes.TemporaryRedirect)
+      }
 
-  println("Hit return to stop.")
+    ZIO.fromFuture(ec => {
+      logger.info("Binding")
+      val f =
+        Http().bindAndHandle(route, "localhost", 8888)
+      lock.synchronized {
+        lock.wait()
+      }
+      f.foreach(_.unbind())
+      f
+    })
 
-  val _ = StdIn.readLine()
-
-  binding.flatMap(_.unbind()).onComplete(_ => system.terminate())
+  }
 
 }

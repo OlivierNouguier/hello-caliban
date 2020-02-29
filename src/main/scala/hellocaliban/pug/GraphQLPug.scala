@@ -34,6 +34,7 @@ import caliban.CalibanError.ExecutionError
 import zio.duration._
 import caliban.GraphQL
 import zio.clock.Clock
+import hellocaliban.friends.Persistence
 
 case class FindPugArgs(name: String)
 case class AddPugArgs(pug: Pug)
@@ -46,7 +47,7 @@ case class Mutations(
     editPugPicture: EditPugPictureArgs => IO[PugNotFound, Unit]
 )
 
-object GraphQLPug {
+class GraphQLPug(persistence: Persistence.Service[Any]) {
 
   implicit val urlSchema: Schema[Any, URL] = Schema.stringSchema.contramap(_.toString)
   implicit val urlArgBuilder: ArgBuilder[URL] = ArgBuilder.string.flatMap(
@@ -70,7 +71,7 @@ object GraphQLPug {
       IO.fail(PugNotFound(name))
   }
 
-  val queries = Queries(args => pugService.findPug(args.name), pugService.randomPugPicture)
+  val queries = Queries(args => persistence.findPug(args.name), pugService.randomPugPicture)
 
   val mutations = Mutations(
     args => pugService.addPug(args.pug),

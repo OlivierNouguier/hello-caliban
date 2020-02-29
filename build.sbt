@@ -8,11 +8,19 @@ lazy val `hello-caliban` =
     .enablePlugins(AutomateHeaderPlugin)
     .settings(settings)
     .settings(
+      Dependencies.doobie,
+      Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
+        library.pureConfig,
         library.scalaCheck % Test,
         library.scalaTest  % Test,
+        library.logback,
+        library.postgresql % Runtime
       )
     )
+    // .settings(
+    //   javaOptions += "-agentpath:/Applications/YourKit-Java-Profiler-2019.8.app/Contents/Resources/bin/mac/libyjpagent.dylib=delay=10000"
+    // )
 
 // *****************************************************************************
 // Library dependencies
@@ -24,10 +32,15 @@ lazy val library =
       val caliban = "0.5.2"
       val scalaCheck = "1.14.2"
       val scalaTest  = "3.1.1"
+      val logback = "1.2.3"
+      val postgresql = "42.2.10.jre7"
     }
     val caliban    = Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
+    val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.12.2"
     val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
     val scalaTest  = "org.scalatest"  %% "scalatest"  % Version.scalaTest
+    val logback = "ch.qos.logback" % "logback-classic" % Version.logback
+    val postgresql = "org.postgresql" % "postgresql" % Version.postgresql
   }
 
 // *****************************************************************************
@@ -65,6 +78,7 @@ lazy val commonSettings =
     Compile / unmanagedSourceDirectories := Seq((Compile / scalaSource).value),
     Test / unmanagedSourceDirectories := Seq((Test / scalaSource).value),
     Compile / compile / wartremoverWarnings ++= Warts.unsafe,
+    Compile / run / fork := true
 )
 
 lazy val scalafmtSettings =

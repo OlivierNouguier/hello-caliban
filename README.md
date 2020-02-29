@@ -2,6 +2,12 @@
 
 Welcome to hello-caliban!
 
+
+## References
+
+[Database testing with doobie](https://blog.softwaremill.com/testing-doobie-programs-425517c1c295)
+[Akka integration](https://medium.com/@ghostdogpr/combining-zio-and-akka-to-enable-distributed-fp-in-scala-61ffb81e3283)
+
 ## Contribution policy ##
 
 Contributions via GitHub pull requests are gladly accepted from their original author. Along with
