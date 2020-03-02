@@ -5,6 +5,7 @@ Welcome to hello-caliban!
 
 ## References
 
+[Dealing with Resources](https://blog.jdriven.com/2019/10/functional-dependency-injection-in-scala-using-zio-environments/)
 [Database testing with doobie](https://blog.softwaremill.com/testing-doobie-programs-425517c1c295)
 [Akka integration](https://medium.com/@ghostdogpr/combining-zio-and-akka-to-enable-distributed-fp-in-scala-61ffb81e3283)
 
