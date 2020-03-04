@@ -17,11 +17,11 @@ object Dependencies {
     )
   )
   
-  val zioVersion = "1.0.0-RC17"
+  val zioVersion = "1.0.0-RC18-1"
 
   val zio = Seq(
     libraryDependencies ++= Seq(
-     "dev.zio" %% "zio-interop-cats" % "2.0.0.0-RC10",
+     "dev.zio" %% "zio-interop-cats" % "2.0.0.0-RC11",
      "dev.zio" %% "zio-test"     % zioVersion % "test",
      "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
     ),

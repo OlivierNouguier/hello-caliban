@@ -19,25 +19,28 @@ package hellocaliban
 import zio.ZIO
 import zio.console._
 import zio.RIO
+import db.HelloCalibanDB
 import hellocaliban.conf.Configuration
 import hellocaliban.conf.Config
 
 import zio.blocking.Blocking
 
-import hellocaliban.friends.Persistence
 import zio.clock.Clock
 import zio.console
 import zio.Task
 import zio.Managed
 import akka.actor.ActorSystem
 
-import doobie.util.transactor.Transactor
+import scala.concurrent.ExecutionContext
+import hellocaliban.pugrero.PugRepo
 
 object CalibanApp extends zio.App {
 
-  type AppEnvironment = Console with Clock with Persistence
+  type AppEnvironment = Console with Clock
 
   def loadConfig: RIO[Configuration, Config] = RIO.accessM(_.config.load)
+
+  def blockingExecutor: RIO[Blocking, ExecutionContext] = RIO.access(_.get.blockingExecutor.asEC)
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def run(args: List[String]): ZIO[zio.ZEnv, Nothing, Int] =
@@ -46,22 +49,16 @@ object CalibanApp extends zio.App {
       .use(
         actorSystem =>
           for {
-            conf        <- loadConfig.provide(Configuration.Live)
-            blockingEnv <- ZIO.environment[Blocking]
-            blockingEC  <- blockingEnv.blocking.blockingExecutor.map(_.asEC)
-            tx = Persistence.makeTx(conf.dbConfig, blockingEC, platform.executor.asEC)
+            conf       <- loadConfig.provide(Configuration.Live)
+            blockingEC <- blockingExecutor
+            tx = HelloCalibanDB.makeTx(conf.dbConfig, blockingEC, platform.executor.asEC)
 
-            e <- tx.use { transactor =>
-              CalibanServer.build(actorSystem).provideSome[zio.ZEnv] { i =>
-                new Console.Live with Clock.Live with Persistence.Live {
-                  override val tnx: Transactor[Task] = transactor
-                }
-              }
+            fullRepo = tx >>> PugRepo.live
 
-            }
+            a <- CalibanServer.build(actorSystem).provideLayer(fullRepo)
 
           } yield 0
       )
+      //.fold(_ => 1, _ => 0)
       .catchAll(e => console.putStrLn(e.toString).as(1))
-
 }

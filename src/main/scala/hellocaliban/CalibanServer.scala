@@ -30,10 +30,12 @@ import pug.GraphQLPug
 
 import akka.http.scaladsl.model.StatusCodes
 
-import zio.DefaultRuntime
 import zio.ZIO
 import org.slf4j.LoggerFactory
-import hellocaliban.friends.Persistence
+import hellocaliban.pugrero.PugRepo
+import zio.RIO
+import zio.clock.Clock
+import zio.console.Console
 
 //import hellocaliban.friends.PugTransactor
 
@@ -41,19 +43,21 @@ object CalibanServer { //extends App with GenericSchema[Console with Clock] {
 
   val logger = LoggerFactory.getLogger(getClass())
 
-  implicit val rt = new DefaultRuntime {}
+  implicit val rt = zio.Runtime.unsafeFromLayer(Console.live ++ Clock.live)
+
+  def repo: RIO[PugRepo, PugRepo.Service] = RIO.access(_.get)
 
   def build(
       implicit system: ActorSystem
-  ): ZIO[CalibanApp.AppEnvironment, Throwable, Http.ServerBinding] =
+  ): ZIO[PugRepo, Throwable, Http.ServerBinding] =
     for {
-      e <- ZIO.environment[CalibanApp.AppEnvironment]
-      d <- makeCalibanServer(e.pugPersistence)
+      e <- repo
+      d <- makeCalibanServer(e)
     } yield d
 
-  def makeCalibanServer(peristence: Persistence.Service[Any])(
+  def makeCalibanServer(peristence: PugRepo.Service)(
       implicit system: ActorSystem
-  ): ZIO[CalibanApp.AppEnvironment, Throwable, Http.ServerBinding] = {
+  ): ZIO[PugRepo, Throwable, Http.ServerBinding] = {
     implicit val executionContext = system.dispatcher
 
     logger.info("Start server")
@@ -68,7 +72,7 @@ object CalibanServer { //extends App with GenericSchema[Console with Clock] {
     }
 
     val route = path("api" / "graphql") {
-        AkkaHttpAdapter.makeHttpService(new GraphQLPug(peristence).interp)
+        AkkaHttpAdapter.makeHttpService(rt.unsafeRun(new GraphQLPug(peristence).interp))
       } ~ path("graphiql") {
         getFromResource("graphiql.html")
       } ~ path("") {

@@ -21,11 +21,10 @@ import java.net.URL
 import zio._
 import doobie.util.meta.Meta
 import doobie.postgres.implicits.pgEnumStringOpt
+import java.{ util => ju }
 
 trait PugService {
-  def findPug(name: String): IO[PugNotFound, Pug]                          // GET request
   def randomPugPicture: UIO[String]                                        // GET request
-  def addPug(pug: Pug): UIO[Unit]                                          // POST request
   def editPugPicture(name: String, pictureUrl: URL): IO[PugNotFound, Unit] // PUT request
 }
 
@@ -51,5 +50,11 @@ object Color {
   implicit val colorMeta = Meta[Color](pgEnumStringOpt("color", fromEnum, toEnum))
 
 }
-case class Pug(name: String, nicknames: List[String], pictureUrl: Option[URL], color: Color)
+case class Pug(
+    id: ju.UUID,
+    name: String,
+    nicknames: List[String],
+    pictureUrl: Option[URL],
+    color: Color
+)
 case class PugNotFound(name: String) extends Throwable

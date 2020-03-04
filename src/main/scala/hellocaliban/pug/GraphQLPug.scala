@@ -34,7 +34,8 @@ import caliban.CalibanError.ExecutionError
 import zio.duration._
 import caliban.GraphQL
 import zio.clock.Clock
-import hellocaliban.friends.Persistence
+
+import hellocaliban.pugrero.PugRepo
 
 case class FindPugArgs(name: String)
 case class AddPugArgs(pug: Pug)
@@ -43,11 +44,11 @@ case class EditPugPictureArgs(name: String, pictureUrl: URL)
 case class Queries(findPug: FindPugArgs => IO[PugNotFound, Pug], randomPugPicture: UIO[String])
 
 case class Mutations(
-    addPug: AddPugArgs => UIO[Unit],
+    addPug: AddPugArgs => UIO[Int],
     editPugPicture: EditPugPictureArgs => IO[PugNotFound, Unit]
 )
 
-class GraphQLPug(persistence: Persistence.Service[Any]) {
+class GraphQLPug(persistence: PugRepo.Service) {
 
   implicit val urlSchema: Schema[Any, URL] = Schema.stringSchema.contramap(_.toString)
   implicit val urlArgBuilder: ArgBuilder[URL] = ArgBuilder.string.flatMap(
@@ -55,18 +56,8 @@ class GraphQLPug(persistence: Persistence.Service[Any]) {
   )
 
   val pugService: PugService = new PugService {
-    override def findPug(name: String): IO[PugNotFound, Pug] =
-      IO.succeed(
-        Pug(
-          "Patrick",
-          List("Pat"),
-          Some(new URL("https://m.media-amazon.com/images/I/81tRAIFb9OL._SS500_.jpg")),
-          Color.FAWN
-        )
-      )
     override def randomPugPicture: UIO[String] =
       UIO.succeed("https://m.media-amazon.com/images/I/81tRAIFb9OL._SS500_.jpg")
-    override def addPug(pug: Pug): UIO[Unit] = UIO.unit
     override def editPugPicture(name: String, pictureUrl: URL): IO[PugNotFound, Unit] =
       IO.fail(PugNotFound(name))
   }
@@ -74,7 +65,7 @@ class GraphQLPug(persistence: Persistence.Service[Any]) {
   val queries = Queries(args => persistence.findPug(args.name), pugService.randomPugPicture)
 
   val mutations = Mutations(
-    args => pugService.addPug(args.pug),
+    args => persistence.addPug(args.pug),
     args => pugService.editPugPicture(args.name, args.pictureUrl)
   )
 

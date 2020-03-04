@@ -29,14 +29,14 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban = "0.5.2"
-      val scalaCheck = "1.14.2"
+      val caliban = "0.6.0+21-fc481c4a"
+      val scalaCheck = "1.14.3"
       val scalaTest  = "3.1.1"
       val logback = "1.2.3"
       val postgresql = "42.2.10.jre7"
     }
     val caliban    = Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
-    val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.12.2"
+    val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.12.3"
     val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
     val scalaTest  = "org.scalatest"  %% "scalatest"  % Version.scalaTest
     val logback = "ch.qos.logback" % "logback-classic" % Version.logback
@@ -70,7 +70,7 @@ lazy val commonSettings =
     "-language:existentials",
     "-unchecked",
     "-Xlint:_,-type-parameter-shadow",
-    "-Xfatal-warnings",
+  //  "-Xfatal-warnings",
     "-Ywarn-numeric-widen",
     "-Ywarn-unused:patvars,-implicits",
     "-Ywarn-value-discard"
