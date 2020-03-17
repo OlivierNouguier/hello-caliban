@@ -11,16 +11,16 @@ lazy val `hello-caliban` =
       Dependencies.doobie,
       Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
-        library.pureConfig,
-        library.scalaCheck % Test,
-        library.scalaTest  % Test,
-        library.logback,
-        library.postgresql % Runtime
-      )
+          library.pureConfig,
+          library.scalaCheck % Test,
+          library.scalaTest  % Test,
+          library.logback,
+          library.postgresql % Runtime
+        )
     )
-    // .settings(
-    //   javaOptions += "-agentpath:/Applications/YourKit-Java-Profiler-2019.8.app/Contents/Resources/bin/mac/libyjpagent.dylib=delay=10000"
-    // )
+// .settings(
+//   javaOptions += "-agentpath:/Applications/YourKit-Java-Profiler-2019.8.app/Contents/Resources/bin/mac/libyjpagent.dylib=delay=10000"
+// )
 
 // *****************************************************************************
 // Library dependencies
@@ -29,18 +29,19 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban = "0.7.1"
+      val caliban    = "0.7.1"
       val scalaCheck = "1.14.3"
       val scalaTest  = "3.1.1"
-      val logback = "1.2.3"
+      val logback    = "1.2.3"
       val postgresql = "42.2.11.jre7"
     }
-    val caliban    = Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
-    val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.12.3"
-    val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
-    val scalaTest  = "org.scalatest"  %% "scalatest"  % Version.scalaTest
-    val logback = "ch.qos.logback" % "logback-classic" % Version.logback
-    val postgresql = "org.postgresql" % "postgresql" % Version.postgresql
+    val caliban =
+      Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
+    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.12.3"
+    val scalaCheck = "org.scalacheck"        %% "scalacheck"     % Version.scalaCheck
+    val scalaTest  = "org.scalatest"         %% "scalatest"      % Version.scalaTest
+    val logback    = "ch.qos.logback"        % "logback-classic" % Version.logback
+    val postgresql = "org.postgresql"        % "postgresql"      % Version.postgresql
   }
 
 // *****************************************************************************
@@ -60,28 +61,28 @@ lazy val commonSettings =
     startYear := Some(2020),
     licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
     scalacOptions ++= Seq(
-      "-deprecation",
-    "-encoding",
-    "UTF-8",
-    "-explaintypes",
-    "-Yrangepos",
-    "-feature",
-    "-language:higherKinds",
-    "-language:existentials",
-    "-unchecked",
-    "-Xlint:_,-type-parameter-shadow",
-  //  "-Xfatal-warnings",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-unused:patvars,-implicits",
-    "-Ywarn-value-discard"
-    ),
+        "-deprecation",
+        "-encoding",
+        "UTF-8",
+        "-explaintypes",
+        "-Yrangepos",
+        "-feature",
+        "-language:higherKinds",
+        "-language:existentials",
+        "-unchecked",
+        "-Xlint:_,-type-parameter-shadow",
+        //  "-Xfatal-warnings",
+        "-Ywarn-numeric-widen",
+        "-Ywarn-unused:patvars,-implicits",
+        "-Ywarn-value-discard"
+      ),
     Compile / unmanagedSourceDirectories := Seq((Compile / scalaSource).value),
     Test / unmanagedSourceDirectories := Seq((Test / scalaSource).value),
     Compile / compile / wartremoverWarnings ++= Warts.unsafe,
     Compile / run / fork := true
-)
+  )
 
 lazy val scalafmtSettings =
   Seq(
-    scalafmtOnCompile := true,
+    scalafmtOnCompile := true
   )
