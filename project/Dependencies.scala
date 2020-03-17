@@ -17,7 +17,7 @@ object Dependencies {
     )
   )
   
-  val zioVersion = "1.0.0-RC18-1"
+  val zioVersion = "1.0.0-RC18-2"
 
   val zio = Seq(
     libraryDependencies ++= Seq(
