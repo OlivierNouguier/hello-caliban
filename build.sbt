@@ -78,7 +78,7 @@ lazy val commonSettings =
       ),
     Compile / unmanagedSourceDirectories := Seq((Compile / scalaSource).value),
     Test / unmanagedSourceDirectories := Seq((Test / scalaSource).value),
-    Compile / compile / wartremoverWarnings ++= Warts.unsafe,
+//    Compile / compile / wartremoverWarnings ++= Warts.unsafe,
     Compile / run / fork := true
   )
 
