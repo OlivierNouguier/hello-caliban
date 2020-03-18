@@ -17,51 +17,120 @@
 package hellocaliban
 
 import caliban.AkkaHttpAdapter
-import caliban.schema.GenericSchema
-
-import zio.console.Console
-import zio.clock.Clock
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.Http
 import akka.actor.ActorSystem
 
-import zio.DefaultRuntime
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
-
-import caliban.schema.GenericSchema
-
-import zio.clock.Clock
-import zio.console.Console
 
 import pug.GraphQLPug
 
 import akka.http.scaladsl.model.StatusCodes
-import scala.io.StdIn
 
-object CalibanServer extends App with GenericSchema[Console with Clock] {
+import zio.ZIO
+import org.slf4j.LoggerFactory
+import hellocaliban.pugrero.PugRepo
+import zio.RIO
+import zio.clock.Clock
+import zio.console.Console
+import zio.UIO
+import zio.Promise
+import zio.Ref
+import scala.util.Failure
+import scala.util.Success
 
-  implicit val system           = ActorSystem()
-  implicit val executionContext = system.dispatcher
-  implicit val defaultRuntime   = new DefaultRuntime {}
+//import hellocaliban.friends.PugTransactor
 
-  val route = path("api" / "graphql") {
-      AkkaHttpAdapter.makeHttpService(GraphQLPug.interp)
-    } ~ path("graphiql") {
-      getFromResource("graphiql.html")
-    } ~ path("") {
-      redirect("graphiql", StatusCodes.TemporaryRedirect)
+trait CountDownLatch {
+  def countDown: UIO[Unit]
+  def await: UIO[Unit]
+}
+
+object CountDownLatch {
+  def make(count: Int): UIO[CountDownLatch] =
+    for {
+      ready <- Promise.make[Nothing, Unit]
+      ref   <- Ref.make(count)
+    } yield new CountDownLatch {
+
+      override def countDown: zio.UIO[Unit] =
+        ref
+          .updateAndGet(_ - 1)
+          .flatMap {
+            case 0 => ready.succeed(()).unit
+            case _ => ZIO.unit
+          }
+
+      override def await: zio.UIO[Unit] = ready.await
+
     }
+}
 
-  val binding = Http().bindAndHandle(route, "localhost", 8888)
+object CalibanServer { //extends App with GenericSchema[Console with Clock] {
 
-  println("Hit return to stop.")
+  val logger = LoggerFactory.getLogger(getClass())
 
-  val _ = StdIn.readLine()
+  implicit val rt = zio.Runtime.unsafeFromLayer(Console.live ++ Clock.live)
 
-  binding.flatMap(_.unbind()).onComplete(_ => system.terminate())
+  def repo: RIO[PugRepo, PugRepo.Service] = RIO.access(_.get)
+
+  def build(
+      implicit system: ActorSystem
+  ): ZIO[PugRepo, Throwable, Http.ServerBinding] =
+    for {
+      latch <- CountDownLatch.make(1)
+      e     <- repo
+      d     <- makeCalibanServer(e).fork
+
+      _ <- ZIO.fromFuture[Unit] { implicit ec =>
+        val p = scala.concurrent.Promise[Unit]
+
+        val _ = sys.addShutdownHook {
+          logger.info("Gracefull good bye")
+          val d = p.success(())
+          if (d.isCompleted)
+            logger.info(s"Good bye crual world!")
+          system.terminate().onComplete {
+            case Failure(exception) =>
+              logger.error("Error during actor system shutdown!", exception)
+            case Success(_) =>
+              logger.info("Actor system terminated.")
+
+          }
+        }
+
+        p.future
+      } *> latch.countDown
+
+      _ <- latch.await
+      s <- d.join
+
+      _ <- ZIO.fromFuture(ec => s.unbind())
+    } yield s
+
+  def makeCalibanServer(peristence: PugRepo.Service)(
+      implicit system: ActorSystem
+  ): ZIO[PugRepo, Throwable, Http.ServerBinding] = {
+    implicit val executionContext = system.dispatcher
+
+    logger.info("Start server")
+
+    val route = path("api" / "graphql") {
+        AkkaHttpAdapter.makeHttpService(rt.unsafeRun(new GraphQLPug(peristence).interp))
+      } ~ path("graphiql") {
+        getFromResource("graphiql.html")
+      } ~ path("") {
+        redirect("graphiql", StatusCodes.TemporaryRedirect)
+      }
+
+    ZIO.fromFuture(ec => {
+      logger.info("Binding")
+      Http().bindAndHandle(route, "localhost", 8888)
+    })
+
+  }
 
 }
