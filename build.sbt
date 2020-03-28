@@ -8,9 +8,11 @@ lazy val `hello-caliban` =
     .enablePlugins(AutomateHeaderPlugin)
     .settings(settings)
     .settings(
+      Dependencies.`akka-http-circe`,
       Dependencies.doobie,
       Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
+          "com.lightbend" %% "emoji" % "1.2.1",
           library.pureConfig,
           library.scalaCheck % Test,
           library.scalaTest  % Test,
@@ -29,7 +31,7 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.7.1"
+      val caliban    = "0.7.3"
       val scalaCheck = "1.14.3"
       val scalaTest  = "3.1.1"
       val logback    = "1.2.3"

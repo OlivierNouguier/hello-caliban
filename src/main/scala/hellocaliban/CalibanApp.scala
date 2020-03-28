@@ -46,19 +46,18 @@ object CalibanApp extends zio.App {
   def run(args: List[String]): ZIO[zio.ZEnv, Nothing, Int] =
     Managed
       .make(Task(ActorSystem("CalibanApp")))(sys => Task(sys.terminate()).ignore)
-      .use(
-        actorSystem =>
-          for {
-            conf       <- loadConfig.provide(Configuration.Live)
-            blockingEC <- blockingExecutor
-            tx = HelloCalibanDB.makeTx(conf.dbConfig, blockingEC, platform.executor.asEC)
+      .use { actorSystem =>
+        for {
+          conf       <- loadConfig.provide(Configuration.Live)
+          blockingEC <- blockingExecutor
+          tx = HelloCalibanDB.makeTx(conf.dbConfig, blockingEC, platform.executor.asEC)
 
-            fullRepo = tx >>> PugRepo.live
+          fullRepo = tx >>> PugRepo.live
 
-            a <- CalibanServer.build(actorSystem).provideLayer(fullRepo)
+          a <- CalibanServer.build(actorSystem).provideLayer(fullRepo)
 
-          } yield 0
-      )
+        } yield 0
+      }
       //.fold(_ => 1, _ => 0)
       .catchAll(e => console.putStrLn(e.toString).as(1))
 }

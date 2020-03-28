@@ -16,8 +16,6 @@
 
 package hellocaliban
 
-import caliban.AkkaHttpAdapter
-
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.Http
 import akka.actor.ActorSystem
@@ -44,6 +42,8 @@ import scala.util.Success
 
 //import hellocaliban.friends.PugTransactor
 
+import caliban.interop.circe.AkkaHttpCirceAdapter
+
 trait CountDownLatch {
   def countDown: UIO[Unit]
   def await: UIO[Unit]
@@ -69,7 +69,7 @@ object CountDownLatch {
     }
 }
 
-object CalibanServer { //extends App with GenericSchema[Console with Clock] {
+object CalibanServer extends AkkaHttpCirceAdapter {
 
   val logger = LoggerFactory.getLogger(getClass())
 
@@ -119,7 +119,7 @@ object CalibanServer { //extends App with GenericSchema[Console with Clock] {
     logger.info("Start server")
 
     val route = path("api" / "graphql") {
-        AkkaHttpAdapter.makeHttpService(rt.unsafeRun(new GraphQLPug(peristence).interp))
+        adapter.makeHttpService(rt.unsafeRun(new GraphQLPug(peristence).interp))
       } ~ path("graphiql") {
         getFromResource("graphiql.html")
       } ~ path("") {

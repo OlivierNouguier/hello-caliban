@@ -34,21 +34,20 @@ object HelloCalibanDB {
   implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def makeTx(config: DbConfig, ce: ExecutionContext, be: ExecutionContext) =
-    ZLayer
-      .fromAcquireRelease(
-        HikariTransactor
-          .newHikariTransactor[Task](
-            config.driver,
-            config.url,
-            config.user,
-            config.password,
-            ce,
-            Blocker.liftExecutionContext(be)
-          )
-          .allocated
-          .orDie
-      ) {
-        case (_, cleanup) => cleanup.orDie
-      }
+    ZLayer.fromAcquireRelease(
+      HikariTransactor
+        .newHikariTransactor[Task](
+          config.driver,
+          config.url,
+          config.user,
+          config.password,
+          ce,
+          Blocker.liftExecutionContext(be)
+        )
+        .allocated
+        .orDie
+    ) {
+      case (_, cleanup) => cleanup.orDie
+    }
 
 }
