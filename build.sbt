@@ -35,7 +35,7 @@ lazy val library =
       val scalaCheck = "1.14.3"
       val scalaTest  = "3.1.1"
       val logback    = "1.2.3"
-      val postgresql = "42.2.11.jre7"
+      val postgresql = "42.2.12.jre7"
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
