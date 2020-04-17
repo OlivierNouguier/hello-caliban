@@ -127,7 +127,7 @@ object CalibanServer extends AkkaHttpCirceAdapter {
       }
 
     ZIO.fromFuture(ec => {
-      logger.info("Binding")
+      logger.info("Binding: 9000")
       Http().bindAndHandle(route, "localhost", 9000)
     })
 
