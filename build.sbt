@@ -31,7 +31,7 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.7.6"
+      val caliban    = "0.7.7"
       val scalaCheck = "1.14.3"
       val scalaTest  = "3.1.1"
       val logback    = "1.2.3"
@@ -57,7 +57,7 @@ lazy val settings =
 lazy val commonSettings =
   Seq(
     // scalaVersion from .travis.yml via sbt-travisci
-    scalaVersion := "2.13.1",
+    scalaVersion := "2.13.2",
     organization := "io.metabookmarks",
     organizationName := "Olivier NOUGUIER",
     startYear := Some(2020),
