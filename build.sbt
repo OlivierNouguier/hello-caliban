@@ -33,7 +33,7 @@ lazy val library =
     object Version {
       val caliban    = "0.7.8"
       val scalaCheck = "1.14.3"
-      val scalaTest  = "3.1.1"
+      val scalaTest  = "3.1.2"
       val logback    = "1.2.3"
       val postgresql = "42.2.12.jre7"
     }

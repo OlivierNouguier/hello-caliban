@@ -107,7 +107,6 @@ object CalibanServer extends AkkaHttpCirceAdapter {
 
       _ <- latch.await
       s <- d.join
-
       _ <- ZIO.fromFuture(ec => s.unbind())
     } yield s
 
