@@ -31,7 +31,7 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.8.0"
+      val caliban    = "0.8.1"
       val scalaCheck = "1.14.3"
       val scalaTest  = "3.1.2"
       val logback    = "1.2.3"

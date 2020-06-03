@@ -33,6 +33,7 @@ import akka.actor.ActorSystem
 
 import scala.concurrent.ExecutionContext
 import hellocaliban.pugrero.PugRepo
+import zio.ExitCode
 
 object CalibanApp extends zio.App {
 
@@ -43,7 +44,7 @@ object CalibanApp extends zio.App {
   def blockingExecutor: RIO[Blocking, ExecutionContext] = RIO.access(_.get.blockingExecutor.asEC)
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  def run(args: List[String]): ZIO[zio.ZEnv, Nothing, Int] =
+  def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] =
     Managed
       .make(Task(ActorSystem("CalibanApp")))(sys => Task(sys.terminate()).ignore)
       .use { actorSystem =>
@@ -56,8 +57,8 @@ object CalibanApp extends zio.App {
 
           a <- CalibanServer.build(actorSystem).provideLayer(fullRepo)
 
-        } yield 0
+        } yield ExitCode.success
       }
       //.fold(_ => 1, _ => 0)
-      .catchAll(e => console.putStrLn(e.toString).as(1))
+      .catchAll(e => console.putStrLn(e.toString).as(ExitCode.failure))
 }
