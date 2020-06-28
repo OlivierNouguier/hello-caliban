@@ -12,7 +12,6 @@ lazy val `hello-caliban` =
       Dependencies.doobie,
       Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
-          "com.lightbend" %% "emoji" % "1.2.1",
           library.pureConfig,
           library.scalaCheck % Test,
           library.scalaTest  % Test,
@@ -31,11 +30,11 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.8.1"
+      val caliban    = "0.8.3"
       val scalaCheck = "1.14.3"
-      val scalaTest  = "3.1.2"
+      val scalaTest  = "3.2.0"
       val logback    = "1.2.3"
-      val postgresql = "42.2.12.jre7"
+      val postgresql = "42.2.14.jre7"
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
@@ -57,7 +56,7 @@ lazy val settings =
 lazy val commonSettings =
   Seq(
     // scalaVersion from .travis.yml via sbt-travisci
-    scalaVersion := "2.13.2",
+    scalaVersion := "2.13.3",
     organization := "io.metabookmarks",
     organizationName := "Olivier NOUGUIER",
     startYear := Some(2020),
