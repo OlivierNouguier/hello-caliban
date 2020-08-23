@@ -30,15 +30,15 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.8.3"
+      val caliban    = "0.9.1"
       val scalaCheck = "1.14.3"
-      val scalaTest  = "3.2.0"
+      val scalaTest  = "3.2.2"
       val logback    = "1.2.3"
-      val postgresql = "42.2.14.jre7"
+      val postgresql = "42.2.16.jre7"
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
-    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.12.3"
+    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.13.0"
     val scalaCheck = "org.scalacheck"        %% "scalacheck"     % Version.scalaCheck
     val scalaTest  = "org.scalatest"         %% "scalatest"      % Version.scalaTest
     val logback    = "ch.qos.logback"        % "logback-classic" % Version.logback

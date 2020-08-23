@@ -4,10 +4,10 @@ import Keys._
 object Dependencies {
 
   val Versions = new  {
-    val `akka-http-circe` = "1.33.0"
+    val `akka-http-circe` = "1.34.0"
     val doobieVersion = "0.9.0"
     val pgEmbedded    = "0.13.3"
-    val zioVersion = "1.0.0-RC19"
+    val zioVersion = "1.0.1"
   }
 
   val doobie = Seq(
