@@ -16,10 +16,6 @@
 
 package hellocaliban
 
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.Http
-import akka.actor.ActorSystem
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
@@ -86,7 +82,7 @@ object CalibanServer extends AkkaHttpCirceAdapter {
       d     <- makeCalibanServer(e).fork
 
       _ <- ZIO.fromFuture[Unit] { implicit ec =>
-        val p = scala.concurrent.Promise[Unit]
+        val p = scala.concurrent.Promise[Unit]()
 
         val _ = sys.addShutdownHook {
           logger.info("Gracefull good bye")
@@ -127,7 +123,7 @@ object CalibanServer extends AkkaHttpCirceAdapter {
 
     ZIO.fromFuture(ec => {
       logger.info("Binding: 9000")
-      Http().bindAndHandle(route, "localhost", 9000)
+      Http().newServerAt("localhost", 9000).bind(route)
     })
 
   }

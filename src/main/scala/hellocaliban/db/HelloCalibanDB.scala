@@ -16,8 +16,6 @@
 
 package hellocaliban.db
 
-import cats.effect._
-
 import doobie.hikari.HikariTransactor
 import hellocaliban.conf.DbConfig
 import scala.concurrent.ExecutionContext
@@ -27,7 +25,6 @@ import zio.interop.catz._
 import doobie.util.ExecutionContexts
 import cats.effect.IO
 
-import doobie._
 import zio.ZLayer
 
 object HelloCalibanDB {
