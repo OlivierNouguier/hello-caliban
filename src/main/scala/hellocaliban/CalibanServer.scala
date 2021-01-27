@@ -24,19 +24,13 @@ import pug.GraphQLPug
 
 import akka.http.scaladsl.model.StatusCodes
 
-import zio.ZIO
+import zio._
 import org.slf4j.LoggerFactory
 import hellocaliban.pugrero.PugRepo
-import zio.RIO
 import zio.clock.Clock
-import zio.console.Console
-import zio.UIO
-import zio.Promise
-import zio.Ref
+import zio.console._
 import scala.util.Failure
 import scala.util.Success
-
-//import hellocaliban.friends.PugTransactor
 
 import caliban.interop.circe.AkkaHttpCirceAdapter
 
@@ -71,40 +65,32 @@ object CalibanServer extends AkkaHttpCirceAdapter {
 
   implicit val rt = zio.Runtime.unsafeFromLayer(Console.live ++ Clock.live)
 
-  def repo: RIO[PugRepo, PugRepo.Service] = RIO.access(_.get)
+  def repo(): RIO[PugRepo, PugRepo.Service] = RIO.access(_.get)
+
+  def shutdowHook(system: ActorSystem): ZIO[Console, Throwable, Unit] = ZIO.effectAsync {
+    callback =>
+      sys.addShutdownHook {
+        system
+          .terminate()
+          .onComplete {
+            case Failure(exception) =>
+              callback(putStrLnErr("bye") *> ZIO.fail(exception))
+            case Success(_) =>
+              callback(putStrLnErr("bye") *> ZIO.succeed(()))
+
+          }(system.dispatcher)
+      }
+  }
 
   def build(
       implicit system: ActorSystem
-  ): ZIO[PugRepo, Throwable, Http.ServerBinding] =
+  ): ZIO[PugRepo with Console, Throwable, Unit] =
     for {
-      latch <- CountDownLatch.make(1)
-      e     <- repo
-      d     <- makeCalibanServer(e).fork
+      repo <- repo()
+      d    <- makeCalibanServer(repo)
+      _    <- shutdowHook(system)
 
-      _ <- ZIO.fromFuture[Unit] { implicit ec =>
-        val p = scala.concurrent.Promise[Unit]()
-
-        val _ = sys.addShutdownHook {
-          logger.info("Gracefull good bye")
-          val d = p.success(())
-          if (d.isCompleted)
-            logger.info(s"Good bye crual world!")
-          system.terminate().onComplete {
-            case Failure(exception) =>
-              logger.error("Error during actor system shutdown!", exception)
-            case Success(_) =>
-              logger.info("Actor system terminated.")
-
-          }
-        }
-
-        p.future
-      } *> latch.countDown
-
-      _ <- latch.await
-      s <- d.join
-      _ <- ZIO.fromFuture(ec => s.unbind())
-    } yield s
+    } yield ()
 
   def makeCalibanServer(peristence: PugRepo.Service)(
       implicit system: ActorSystem

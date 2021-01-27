@@ -16,22 +16,16 @@
 
 package hellocaliban
 
-import zio.ZIO
+import zio._
 import zio.console._
-import zio.RIO
 import db.HelloCalibanDB
 import hellocaliban.conf.Configuration
 import hellocaliban.conf.Config
 
-import zio.blocking.Blocking
-
 import zio.clock.Clock
-import zio.console
-import zio.Task
-import zio.Managed
+
 import akka.actor.ActorSystem
 
-import scala.concurrent.ExecutionContext
 import hellocaliban.pugrero.PugRepo
 import zio.ExitCode
 
@@ -41,24 +35,21 @@ object CalibanApp extends zio.App {
 
   def loadConfig: RIO[Configuration, Config] = RIO.accessM(_.config.load)
 
-  def blockingExecutor: RIO[Blocking, ExecutionContext] = RIO.access(_.get.blockingExecutor.asEC)
-
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] =
     Managed
       .make(Task(ActorSystem("CalibanApp")))(sys => Task(sys.terminate()).ignore)
       .use { actorSystem =>
         for {
-          conf       <- loadConfig.provide(Configuration.Live)
-          blockingEC <- blockingExecutor
-          tx = HelloCalibanDB.makeTx(conf.dbConfig, blockingEC, platform.executor.asEC)
+          conf <- loadConfig.provide(Configuration.Live)
+          tx = HelloCalibanDB.makeTxLayer(conf.dbConfig)
 
-          fullRepo = tx >>> PugRepo.live
+          fullRepo = tx >>> PugRepo.live ++ ZEnv.live
 
-          a <- CalibanServer.build(actorSystem).provideLayer(fullRepo)
+          _ <- CalibanServer.build(actorSystem).provideLayer(fullRepo)
 
-        } yield ExitCode.success
+        } yield ()
       }
-      //.fold(_ => 1, _ => 0)
-      .catchAll(e => console.putStrLn(e.toString).as(ExitCode.failure))
+      .exitCode
+
 }

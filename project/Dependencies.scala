@@ -4,10 +4,10 @@ import Keys._
 object Dependencies {
 
   val Versions = new  {
-    val `akka-http-circe` = "1.34.0"
-    val doobieVersion = "0.9.2"
+    val `akka-http-circe` = "1.35.3"
+    val doobieVersion = "0.10.0"
     val pgEmbedded    = "0.13.3"
-    val zioVersion = "1.0.1"
+    val zioVersion = "1.0.4"
   }
 
   val doobie = Seq(
@@ -34,7 +34,7 @@ object Dependencies {
 
   val zio = Seq(
     libraryDependencies ++= Seq(
-        "dev.zio" %% "zio-interop-cats" % "2.0.0.0-RC11",
+        "dev.zio" %% "zio-interop-cats" % "2.2.0.1",
         "dev.zio" %% "zio-test"         % Versions.zioVersion % "test",
         "dev.zio" %% "zio-test-sbt"     % Versions.zioVersion % "test"
       ),

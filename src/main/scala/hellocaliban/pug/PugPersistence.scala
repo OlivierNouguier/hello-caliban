@@ -50,12 +50,12 @@ package object pugrero {
       def findPug(name: String): zio.IO[PugNotFound, Pug] // GET request
       def addPug(pug: Pug): UIO[Int]
     }
-
-    val live: ZLayer[Has[(HikariTransactor[Task], Task[Unit])], Nothing, PugRepo] =
+    val live: ZLayer[Has[HikariTransactor[zio.Task]], Nothing, PugRepo] =
+//    val live: ZLayer[Has[(HikariTransactor[Task], Task[Unit])], Nothing, PugRepo] =
       ZLayer.fromFunction { tx =>
         new Service {
 
-          val tnx: Transactor[Task] = tx.get._1
+          val tnx: Transactor[Task] = tx.get
 
           def findPug(name: String): zio.IO[PugNotFound, Pug] =
             sql"SELECT id, name, nicknames, picture_url, color FROM pug WHERE name = $name"

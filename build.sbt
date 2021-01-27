@@ -13,6 +13,8 @@ lazy val `hello-caliban` =
       Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
           library.pureConfig,
+          compilerPlugin(
+        "org.scalameta" % "semanticdb-scalac" % "4.4.7" cross CrossVersion.full),
           library.scalaCheck % Test,
           library.scalaTest  % Test,
           library.logback,
@@ -30,15 +32,15 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.9.2"
-      val scalaCheck = "1.14.3"
-      val scalaTest  = "3.2.2"
+      val caliban    = "0.9.4"
+      val scalaCheck = "1.15.2"
+      val scalaTest  = "3.2.3"
       val logback    = "1.2.3"
-      val postgresql = "42.2.16.jre7"
+      val postgresql = "42.2.18.jre7"
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
-    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.13.0"
+    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.14.0"
     val scalaCheck = "org.scalacheck"        %% "scalacheck"     % Version.scalaCheck
     val scalaTest  = "org.scalatest"         %% "scalatest"      % Version.scalaTest
     val logback    = "ch.qos.logback"        % "logback-classic" % Version.logback
@@ -56,7 +58,7 @@ lazy val settings =
 lazy val commonSettings =
   Seq(
     // scalaVersion from .travis.yml via sbt-travisci
-    scalaVersion := "2.13.3",
+    scalaVersion := "2.13.4",
     organization := "io.metabookmarks",
     organizationName := "Olivier NOUGUIER",
     startYear := Some(2020),

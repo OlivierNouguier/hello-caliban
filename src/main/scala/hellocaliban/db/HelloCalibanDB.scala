@@ -19,15 +19,38 @@ package hellocaliban.db
 import doobie.hikari.HikariTransactor
 import hellocaliban.conf.DbConfig
 import scala.concurrent.ExecutionContext
-import zio.Task
+
 import cats.effect.Blocker
 import zio.interop.catz._
 import doobie.util.ExecutionContexts
 import cats.effect.IO
 
-import zio.ZLayer
+import zio._
 
+import zio.blocking._
 object HelloCalibanDB {
+
+  def hikariTransactor(
+      config: DbConfig
+  ): ZManaged[Blocking, Throwable, HikariTransactor[Task]] =
+    for {
+      blockingExecutor <- blockingExecutor.toManaged_
+      runtime          <- ZIO.runtime[Any].toManaged_
+      transactor <- HikariTransactor
+        .newHikariTransactor[Task](
+          config.driver,
+          config.url,
+          config.user,
+          config.password,
+          runtime.platform.executor.asEC,
+          Blocker.liftExecutionContext(blockingExecutor.asEC)
+        )
+        .toManagedZIO
+    } yield transactor
+
+  def makeTxLayer(config: DbConfig) =
+    ZLayer.fromManaged(hikariTransactor(config))
+
   implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def makeTx(config: DbConfig, ce: ExecutionContext, be: ExecutionContext) =
