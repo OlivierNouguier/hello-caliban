@@ -7,14 +7,13 @@ lazy val `hello-caliban` =
     .in(file("."))
     .enablePlugins(AutomateHeaderPlugin)
     .settings(settings)
+    .settings(addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.4.9" cross CrossVersion.full))
     .settings(
       Dependencies.`akka-http-circe`,
       Dependencies.doobie,
       Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
           library.pureConfig,
-          compilerPlugin(
-        "org.scalameta" % "semanticdb-scalac" % "4.4.7" cross CrossVersion.full),
           library.scalaCheck % Test,
           library.scalaTest  % Test,
           library.logback,
@@ -32,11 +31,11 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.9.4"
-      val scalaCheck = "1.15.2"
-      val scalaTest  = "3.2.3"
+      val caliban    = "0.9.5"
+      val scalaCheck = "1.15.3"
+      val scalaTest  = "3.2.5"
       val logback    = "1.2.3"
-      val postgresql = "42.2.18.jre7"
+      val postgresql = "42.2.19.jre7"
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)

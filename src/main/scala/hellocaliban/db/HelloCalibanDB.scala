@@ -18,12 +18,9 @@ package hellocaliban.db
 
 import doobie.hikari.HikariTransactor
 import hellocaliban.conf.DbConfig
-import scala.concurrent.ExecutionContext
 
 import cats.effect.Blocker
 import zio.interop.catz._
-import doobie.util.ExecutionContexts
-import cats.effect.IO
 
 import zio._
 
@@ -50,24 +47,5 @@ object HelloCalibanDB {
 
   def makeTxLayer(config: DbConfig) =
     ZLayer.fromManaged(hikariTransactor(config))
-
-  implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  def makeTx(config: DbConfig, ce: ExecutionContext, be: ExecutionContext) =
-    ZLayer.fromAcquireRelease(
-      HikariTransactor
-        .newHikariTransactor[Task](
-          config.driver,
-          config.url,
-          config.user,
-          config.password,
-          ce,
-          Blocker.liftExecutionContext(be)
-        )
-        .allocated
-        .orDie
-    ) {
-      case (_, cleanup) => cleanup.orDie
-    }
 
 }

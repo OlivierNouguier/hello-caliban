@@ -67,7 +67,7 @@ object CalibanServer extends AkkaHttpCirceAdapter {
 
   def repo(): RIO[PugRepo, PugRepo.Service] = RIO.access(_.get)
 
-  def shutdowHook(system: ActorSystem): ZIO[Console, Throwable, Unit] = ZIO.effectAsync {
+  def shutdowHook(system: ActorSystem): ZIO[Console, Throwable, ExitCode] = ZIO.effectAsync {
     callback =>
       sys.addShutdownHook {
         system
@@ -76,7 +76,7 @@ object CalibanServer extends AkkaHttpCirceAdapter {
             case Failure(exception) =>
               callback(putStrLnErr("bye") *> ZIO.fail(exception))
             case Success(_) =>
-              callback(putStrLnErr("bye") *> ZIO.succeed(()))
+              callback(putStrLnErr("bye") *> ZIO.succeed(ExitCode.success))
 
           }(system.dispatcher)
       }
@@ -84,13 +84,13 @@ object CalibanServer extends AkkaHttpCirceAdapter {
 
   def build(
       implicit system: ActorSystem
-  ): ZIO[PugRepo with Console, Throwable, Unit] =
+  ): ZIO[PugRepo with Console, Throwable, ExitCode] =
     for {
       repo <- repo()
       d    <- makeCalibanServer(repo)
-      _    <- shutdowHook(system)
+      ec   <- shutdowHook(system)
 
-    } yield ()
+    } yield ec
 
   def makeCalibanServer(peristence: PugRepo.Service)(
       implicit system: ActorSystem
