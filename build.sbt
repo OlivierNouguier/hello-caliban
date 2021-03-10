@@ -7,7 +7,7 @@ lazy val `hello-caliban` =
     .in(file("."))
     .enablePlugins(AutomateHeaderPlugin)
     .settings(settings)
-    .settings(addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.4.9" cross CrossVersion.full))
+    .settings(addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.4.10" cross CrossVersion.full))
     .settings(
       Dependencies.`akka-http-circe`,
       Dependencies.doobie,
@@ -39,7 +39,7 @@ lazy val library =
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
-    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.14.0"
+    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.14.1"
     val scalaCheck = "org.scalacheck"        %% "scalacheck"     % Version.scalaCheck
     val scalaTest  = "org.scalatest"         %% "scalatest"      % Version.scalaTest
     val logback    = "ch.qos.logback"        % "logback-classic" % Version.logback
@@ -57,7 +57,7 @@ lazy val settings =
 lazy val commonSettings =
   Seq(
     // scalaVersion from .travis.yml via sbt-travisci
-    scalaVersion := "2.13.4",
+    scalaVersion := "2.13.5",
     organization := "io.metabookmarks",
     organizationName := "Olivier NOUGUIER",
     startYear := Some(2020),
