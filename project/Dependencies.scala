@@ -3,11 +3,11 @@ import Keys._
 
 object Dependencies {
 
-  val Versions = new  {
-    val `akka-http-circe` = "1.35.3"
-    val doobieVersion = "0.12.1"
-    val pgEmbedded    = "0.13.3"
-    val zioVersion = "1.0.5"
+  val Versions = new {
+    val `akka-http-circe` = "1.36.0"
+    val doobieVersion     = "0.13.1"
+    val pgEmbedded        = "0.13.3"
+    val zioVersion        = "1.0.7"
   }
 
   val doobie = Seq(
@@ -23,13 +23,10 @@ object Dependencies {
       )
   )
 
-  
-
-
-  val `akka-http-circe` = Seq{
-     libraryDependencies ++= Seq(
-       "de.heikoseeberger" %% "akka-http-circe" % Versions.`akka-http-circe` 
-     )
+  val `akka-http-circe` = Seq {
+    libraryDependencies ++= Seq(
+      "de.heikoseeberger" %% "akka-http-circe" % Versions.`akka-http-circe`
+    )
   }
 
   val zio = Seq(

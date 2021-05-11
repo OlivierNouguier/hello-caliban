@@ -1,3 +1,12 @@
+inThisBuild(
+   List(
+     scalaVersion := "2.13.5", // 2.11.12, or 2.13.5
+    semanticdbEnabled := true, // enable SemanticDB
+    semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+    scalafixDependencies += "com.timushev" %% "zio-magic-comments" % "0.1.0"
+
+   )
+ )
 // *****************************************************************************
 // Projects
 // *****************************************************************************
@@ -7,13 +16,14 @@ lazy val `hello-caliban` =
     .in(file("."))
     .enablePlugins(AutomateHeaderPlugin)
     .settings(settings)
-    .settings(addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.4.10" cross CrossVersion.full))
+    .settings(addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.4.15" cross CrossVersion.full))
     .settings(
       Dependencies.`akka-http-circe`,
       Dependencies.doobie,
       Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
           library.pureConfig,
+          library.zioMagick,
           library.scalaCheck % Test,
           library.scalaTest  % Test,
           library.logback,
@@ -31,19 +41,21 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.9.5"
-      val scalaCheck = "1.15.3"
-      val scalaTest  = "3.2.5"
+      val caliban    = "0.10.0"
+      val scalaCheck = "1.15.4"
+      val scalaTest  = "3.2.8"
       val logback    = "1.2.3"
-      val postgresql = "42.2.19.jre7"
+      val postgresql = "42.2.20.jre7"
+      val zioMagick  = "0.3.2"
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
-    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.14.1"
+    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.15.0"
     val scalaCheck = "org.scalacheck"        %% "scalacheck"     % Version.scalaCheck
     val scalaTest  = "org.scalatest"         %% "scalatest"      % Version.scalaTest
     val logback    = "ch.qos.logback"        % "logback-classic" % Version.logback
     val postgresql = "org.postgresql"        % "postgresql"      % Version.postgresql
+    val zioMagick  =  "io.github.kitlangton" %% "zio-magic"      % Version.zioMagick
   }
 
 // *****************************************************************************

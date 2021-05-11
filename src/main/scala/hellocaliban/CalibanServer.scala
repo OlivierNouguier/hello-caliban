@@ -103,6 +103,11 @@ object CalibanServer extends AkkaHttpCirceAdapter {
         adapter.makeHttpService(rt.unsafeRun(new GraphQLPug(peristence).interp))
       } ~ path("graphiql") {
         getFromResource("graphiql.html")
+      } ~ path("opt") {
+        parameter("zozo".?) { zozo =>
+          complete(s"ok $zozo")
+        }
+
       } ~ path("") {
         redirect("graphiql", StatusCodes.TemporaryRedirect)
       }

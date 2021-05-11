@@ -17,12 +17,11 @@
 package hellocaliban
 
 import zio._
-import zio.console._
+import zio.magic._
+
 import db.HelloCalibanDB
 import hellocaliban.conf.Configuration
 import hellocaliban.conf.Config
-
-import zio.clock.Clock
 
 import akka.actor.ActorSystem
 
@@ -31,25 +30,21 @@ import zio.ExitCode
 
 object CalibanApp extends zio.App {
 
-  type AppEnvironment = Console with Clock
-
   def loadConfig: RIO[Configuration, Config] = RIO.accessM(_.config.load)
+
+  val program = Managed
+    .make(Task(ActorSystem("CalibanApp")))(sys => Task(sys.terminate()).ignore)
+    .use { actorSystem =>
+      for {
+        conf <- loadConfig.provide(Configuration.Live)
+        tx = HelloCalibanDB.makeTxLayer(conf.dbConfig)
+        _ <- CalibanServer.build(actorSystem).injectCustom(tx, PugRepo.live)
+
+      } yield ()
+    }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] =
-    Managed
-      .make(Task(ActorSystem("CalibanApp")))(sys => Task(sys.terminate()).ignore)
-      .use { actorSystem =>
-        for {
-          conf <- loadConfig.provide(Configuration.Live)
-          tx = HelloCalibanDB.makeTxLayer(conf.dbConfig)
-
-          fullRepo = tx >>> PugRepo.live ++ ZEnv.live
-
-          _ <- CalibanServer.build(actorSystem).provideLayer(fullRepo)
-
-        } yield ()
-      }
-      .exitCode
+    program.exitCode
 
 }
