@@ -1,6 +1,7 @@
 inThisBuild(
    List(
      scalaVersion := "2.13.5", // 2.11.12, or 2.13.5
+//     scalaVersion := "3.0.0-RC3", // 2.11.12, or 2.13.5
     semanticdbEnabled := true, // enable SemanticDB
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
     scalafixDependencies += "com.timushev" %% "zio-magic-comments" % "0.1.0"
@@ -23,7 +24,7 @@ lazy val `hello-caliban` =
       Dependencies.zio,
       libraryDependencies ++= library.caliban ++ Seq(
           library.pureConfig,
-          library.zioMagick,
+      //    library.zioMagick,
           library.scalaCheck % Test,
           library.scalaTest  % Test,
           library.logback,
@@ -69,7 +70,6 @@ lazy val settings =
 lazy val commonSettings =
   Seq(
     // scalaVersion from .travis.yml via sbt-travisci
-    scalaVersion := "2.13.5",
     organization := "io.metabookmarks",
     organizationName := "Olivier NOUGUIER",
     startYear := Some(2020),

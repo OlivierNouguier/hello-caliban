@@ -17,7 +17,7 @@
 package hellocaliban
 
 import zio._
-import zio.magic._
+//import zio.magic._
 
 import db.HelloCalibanDB
 import hellocaliban.conf.Configuration
@@ -37,8 +37,10 @@ object CalibanApp extends zio.App {
     .use { actorSystem =>
       for {
         conf <- loadConfig.provide(Configuration.Live)
-        tx = HelloCalibanDB.makeTxLayer(conf.dbConfig)
-        _ <- CalibanServer.build(actorSystem).injectCustom(tx, PugRepo.live)
+        tx     = HelloCalibanDB.makeTxLayer(conf.dbConfig)
+        layers = tx >>> PugRepo.live
+        _ <- CalibanServer.build(actorSystem).provideCustomLayer(layers)
+        //      _ <- CalibanServer.build(actorSystem).injectCustom(tx, PugRepo.live)
 
       } yield ()
     }

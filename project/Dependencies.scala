@@ -5,7 +5,7 @@ object Dependencies {
 
   val Versions = new {
     val `akka-http-circe` = "1.36.0"
-    val doobieVersion     = "0.13.1"
+    val doobieVersion     = "0.13.2"
     val pgEmbedded        = "0.13.3"
     val zioVersion        = "1.0.7"
   }
