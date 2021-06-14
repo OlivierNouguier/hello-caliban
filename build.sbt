@@ -1,6 +1,6 @@
 inThisBuild(
    List(
-     scalaVersion := "2.13.5", // 2.11.12, or 2.13.5
+     scalaVersion := "2.13.6", // 2.11.12, or 2.13.5
 //     scalaVersion := "3.0.0-RC3", // 2.11.12, or 2.13.5
     semanticdbEnabled := true, // enable SemanticDB
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
@@ -17,7 +17,7 @@ lazy val `hello-caliban` =
     .in(file("."))
     .enablePlugins(AutomateHeaderPlugin)
     .settings(settings)
-    .settings(addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.4.15" cross CrossVersion.full))
+    .settings(addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.4.21" cross CrossVersion.full))
     .settings(
       Dependencies.`akka-http-circe`,
       Dependencies.doobie,
@@ -42,7 +42,7 @@ lazy val `hello-caliban` =
 lazy val library =
   new {
     object Version {
-      val caliban    = "0.10.0"
+      val caliban    = "1.0.0"
       val scalaCheck = "1.15.4"
       val scalaTest  = "3.2.8"
       val logback    = "1.2.3"
@@ -51,7 +51,7 @@ lazy val library =
     }
     val caliban =
       Seq("caliban", "caliban-akka-http").map("com.github.ghostdogpr" %% _ % Version.caliban)
-    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.15.0"
+    val pureConfig = "com.github.pureconfig" %% "pureconfig"     % "0.16.0"
     val scalaCheck = "org.scalacheck"        %% "scalacheck"     % Version.scalaCheck
     val scalaTest  = "org.scalatest"         %% "scalatest"      % Version.scalaTest
     val logback    = "ch.qos.logback"        % "logback-classic" % Version.logback
